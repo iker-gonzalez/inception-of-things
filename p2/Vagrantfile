@@ -64,18 +64,22 @@ Vagrant.configure("2") do |config|
   # * Display the VMWare GUI when booting the machine
     v.vmx["gui"] = "true"
   # * Customize the amount of CPUs on the VM:
-    v.vmx["numvcpus"] = "1"
+    v.vmx["numvcpus"] = "2"
   # * Customize the amount of memory on the VM:
-    v.vmx["memsize"] = "512"
+    v.vmx["memsize"] = "1024"
   end
 
-  # * Copy deployment, service, and ingress files to the guest machine
+  # * Create directories for apps in the home directory and change ownership to ssh vagrant user
   config.vm.provision "shell", inline: <<-SHELL
   mkdir -p /home/vagrant/app1
   mkdir -p /home/vagrant/app2
   mkdir -p /home/vagrant/app3
+  sudo chown -R vagrant:vagrant /home/vagrant/app1
+  sudo chown -R vagrant:vagrant /home/vagrant/app2
+  sudo chown -R vagrant:vagrant /home/vagrant/app3
   SHELL
 
+  # * Copy deployment, service, and ingress files to the guest machine
   config.vm.provision "file", source: "app1/deployment.yaml", destination: "/home/vagrant/app1/deployment.yaml"
   config.vm.provision "file", source: "app1/service.yaml", destination: "/home/vagrant/app1/service.yaml"
   config.vm.provision "file", source: "app1/ingress.yaml", destination: "/home/vagrant/app1/ingress.yaml"
@@ -106,7 +110,13 @@ Vagrant.configure("2") do |config|
 
     # * Set KUBECONFIG environment variable
     echo "export KUBECONFIG=/etc/rancher/k3s/k3s.yaml" | sudo tee -a /etc/profile
-    . ~/.bashrc
+    
+    # * Source /etc/profile to set KUBECONFIG environment variable in this shell session
+    . /etc/profile
+
+    # * Wait for the Kubernetes cluster to initialize
+    echo "Waiting for Kubernetes to start..."
+    sleep 60  # wait for 60 seconds
 
     #  * Apply the deployment, service, and ingress files
     kubectl apply -f /home/vagrant/app1/deployment.yaml
