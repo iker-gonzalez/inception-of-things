@@ -60,7 +60,7 @@ Vagrant.configure("2") do |config|
   # ! Provision VMware with 1 CPU and 512MB of memory
   config.vm.provider "vmware_fusion" do |v|
   # * Set the name of the VM
-    config.vm.hostname = "ioromeroS"
+    config.vm.hostname = "ikgonzalS"
   # * Display the VMWare GUI when booting the machine
     v.vmx["gui"] = "true"
   # * Customize the amount of CPUs on the VM:
@@ -68,6 +68,15 @@ Vagrant.configure("2") do |config|
   # * Customize the amount of memory on the VM:
     v.vmx["memsize"] = "512"
   end
+
+  # * Copy deployment, service, and ingress files to the guest machine
+  config.vm.provision "file", source: "deployments/app1-deployment.yaml", destination: "/home/vagrant/app1-deployment.yaml"
+  config.vm.provision "file", source: "deployments/app2-deployment.yaml", destination: "/home/vagrant/app2-deployment.yaml"
+  config.vm.provision "file", source: "deployments/app3-deployment.yaml", destination: "/home/vagrant/app3-deployment.yaml"
+  config.vm.provision "file", source: "services/app1-service.yaml", destination: "/home/vagrant/app1-service.yaml"
+  config.vm.provision "file", source: "services/app2-service.yaml", destination: "/home/vagrant/app2-service.yaml"
+  config.vm.provision "file", source: "services/app3-service.yaml", destination: "/home/vagrant/app3-service.yaml"
+  config.vm.provision "file", source: "ingress/ingress.yaml", destination: "/home/vagrant/ingress.yaml"
 
   #
   # View the documentation for the provider you are using for more
@@ -88,5 +97,14 @@ Vagrant.configure("2") do |config|
     # * Set KUBECONFIG environment variable
     echo "export KUBECONFIG=/etc/rancher/k3s/k3s.yaml" | sudo tee -a /etc/profile
     . ~/.bashrc
+
+    #  * Apply the deployment, service, and ingress files
+    kubectl apply -f /home/vagrant/app1-deployment.yaml
+    kubectl apply -f /home/vagrant/app2-deployment.yaml
+    kubectl apply -f /home/vagrant/app3-deployment.yaml
+    kubectl apply -f /home/vagrant/app1-service.yaml
+    kubectl apply -f /home/vagrant/app2-service.yaml
+    kubectl apply -f /home/vagrant/app3-service.yaml
+    kubectl apply -f /home/vagrant/ingress.yaml
   SHELL
 end
