@@ -73,7 +73,24 @@ if lsof -i:$desired_port > /dev/null 2>&1; then
   exit 1
 fi
 echo "Forwarding the wils-app service port to localhost:$desired_port..."
-kubectl -n dev port-forward svc/svc-wils-app $desired_port:8080 &
+
+# Start a loop that sets up the port-forwarding again whenever a new pod is created
+while true; do
+  # Get the name of the wils-app pod
+  pod_name=$(kubectl get pod -n dev -l app=wils-app -o jsonpath="{.items[0].metadata.name}")
+
+  # Set up the port-forwarding
+  kubectl -n dev port-forward svc/svc-wils-app $desired_port:8080 &
+
+  # Store the process ID of the port-forwarding command
+  port_forward_pid=$!
+
+  # Wait for the pod to terminate
+  kubectl wait --for=delete pod/$pod_name -n dev
+
+  # Kill the port-forwarding command
+  kill -9 $port_forward_pid
+done
 
 # Forward the ArgoCD server port
 desired_port=8080
