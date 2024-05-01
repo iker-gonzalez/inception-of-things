@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: wils-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/iker-gonzalez/ioromero'
+    targetRevision: HEAD
+    path: .
+  destination:
+    namespace: dev
+    server: 'https://kubernetes.default.svc'
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

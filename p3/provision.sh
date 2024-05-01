@@ -39,27 +39,10 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 
 # Wait for ArgoCD to be ready
 echo "Waiting for ArgoCD to be ready..."
-sleep 15
+kubectl wait --for=condition=ready --timeout=120s pod --all -n argocd
 
 # Create ArgoCD application
-cat <<EOF | kubectl apply -f -
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: wils-app
-  namespace: argocd
-spec:
-  project: default
-  source:
-    repoURL: 'https://github.com/iker-gonzalez/ioromero'
-    targetRevision: HEAD
-    path: .
-  destination:
-    namespace: dev
-    server: 'https://kubernetes.default.svc'
-  syncPolicy:
-    automated: {}
-EOF
+kubectl apply -f argo-app.yaml
 
 # Wait for ArgoCD to sync the application
 echo "Waiting for ArgoCD to sync the application..."
