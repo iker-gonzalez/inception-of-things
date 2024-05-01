@@ -70,7 +70,7 @@ desired_port=8888
 echo "Checking if port $desired_port is in use..."
 if lsof -i:$desired_port > /dev/null 2>&1; then
   echo "Port $desired_port is in use. Please free up the port and run the script again."
-  exit 1
+  kill_process_on_port $desired_port
 fi
 echo "Forwarding the wils-app service port to localhost:$desired_port..."
 kubectl -n dev port-forward svc/svc-wils-app $desired_port:8080 &
