@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Function to kill the process using a port
+kill_process_on_port() {
+  local port=$1
+  lsof -i tcp:${port} | awk 'NR!=1 {print $2}' | xargs kill -9 > /dev/null 2>&1
+}
+
 # Check if the cluster already exists
 if ! k3d cluster list | grep -q 'mycluster'; then
   # Create a new k3d cluster
@@ -33,7 +39,7 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 
 # Wait for ArgoCD to be ready
 echo "Waiting for ArgoCD to be ready..."
-sleep 30
+sleep 15
 
 # Create ArgoCD application
 cat <<EOF | kubectl apply -f -
@@ -57,15 +63,27 @@ EOF
 
 # Wait for ArgoCD to sync the application
 echo "Waiting for ArgoCD to sync the application..."
-sleep 30
+sleep 15
 
 # Forward the wils-app service port
-echo "Forwarding the wils-app service port to localhost:8888..."
-kubectl -n dev port-forward svc/wils-app 8888:8888 &
+desired_port=8888
+echo "Checking if port $desired_port is in use..."
+if lsof -i:$desired_port > /dev/null 2>&1; then
+  echo "Port $desired_port is in use. Please free up the port and run the script again."
+  exit 1
+fi
+echo "Forwarding the wils-app service port to localhost:$desired_port..."
+kubectl -n dev port-forward svc/svc-wils-app $desired_port:8080 &
 
 # Forward the ArgoCD server port
-echo "Forwarding the ArgoCD server port to localhost:8080..."
-kubectl port-forward svc/argocd-server -n argocd 8080:443 &
+desired_port=8080
+echo "Checking if port $desired_port is in use..."
+if lsof -i:$desired_port > /dev/null 2>&1; then
+  echo "Port $desired_port is in use. Attempting to free up the port..."
+  kill_process_on_port $desired_port
+fi
+echo "Forwarding the ArgoCD server port to localhost:$desired_port..."
+kubectl port-forward svc/argocd-server -n argocd $desired_port:443 &
 
 # Print ArgoCD initial admin username and password
 echo "ArgoCD initial admin credentials:"
