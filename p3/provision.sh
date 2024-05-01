@@ -18,7 +18,7 @@ fi
 #k3d kubeconfig write mycluster --kubeconfig-switch-context
 
 # Check if the kubeconfig file exists
-KUBECONFIG=~/.kube/config
+export KUBECONFIG=~/.kube/config
 if [ ! -f "$KUBECONFIG" ]; then
   echo "Kubeconfig file not found at $KUBECONFIG"
   exit 1
