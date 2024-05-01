@@ -14,12 +14,12 @@ spec:
     spec:
       containers:
       - name: app1
-        image: mendhak/http-https-echo
-        env:
-        - name: BODY
-          value: "Hello, I am app 1"
+        image: nginx:stable
         ports:
         - containerPort: 80
+        volumeMounts:
+        - name: app1-volume
+          mountPath: /usr/share/nginx/html
         resources:
           requests:
             cpu: "50m"
@@ -27,3 +27,7 @@ spec:
           limits:
             cpu: "100m"
             memory: "100Mi"
+      volumes:
+      - name: app1-volume
+        hostPath:
+          path: /vagrant/app1
