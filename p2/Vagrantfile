@@ -80,20 +80,20 @@ Vagrant.configure("2") do |config|
   SHELL
 
   # * Copy deployment, service, ingress and index files to the guest machine
-  config.vm.provision "file", source: "app1/deployment.yaml", destination: "/home/vagrant/app1/deployment.yaml"
-  config.vm.provision "file", source: "app1/service.yaml", destination: "/home/vagrant/app1/service.yaml"
-  config.vm.provision "file", source: "app1/ingress.yaml", destination: "/home/vagrant/app1/ingress.yaml"
-  config.vm.provision "file", source: "app1/index.html", destination: "/home/vagrant/app1/index.html"
+  config.vm.provision "file", source: "confs/app1/deployment.yaml", destination: "/home/vagrant/app1/deployment.yaml"
+  config.vm.provision "file", source: "confs/app1/service.yaml", destination: "/home/vagrant/app1/service.yaml"
+  config.vm.provision "file", source: "confs/app1/ingress.yaml", destination: "/home/vagrant/app1/ingress.yaml"
+  config.vm.provision "file", source: "confs/app1/index.html", destination: "/home/vagrant/app1/index.html"
   
-  config.vm.provision "file", source: "app2/deployment.yaml", destination: "/home/vagrant/app2/deployment.yaml"
-  config.vm.provision "file", source: "app2/service.yaml", destination: "/home/vagrant/app2/service.yaml"
-  config.vm.provision "file", source: "app2/ingress.yaml", destination: "/home/vagrant/app2/ingress.yaml"
-  config.vm.provision "file", source: "app2/index.html", destination: "/home/vagrant/app2/index.html"
+  config.vm.provision "file", source: "confs/app2/deployment.yaml", destination: "/home/vagrant/app2/deployment.yaml"
+  config.vm.provision "file", source: "confs/app2/service.yaml", destination: "/home/vagrant/app2/service.yaml"
+  config.vm.provision "file", source: "confs/app2/ingress.yaml", destination: "/home/vagrant/app2/ingress.yaml"
+  config.vm.provision "file", source: "confs/app2/index.html", destination: "/home/vagrant/app2/index.html"
   
-  config.vm.provision "file", source: "app3/deployment.yaml", destination: "/home/vagrant/app3/deployment.yaml"
-  config.vm.provision "file", source: "app3/service.yaml", destination: "/home/vagrant/app3/service.yaml"
-  config.vm.provision "file", source: "app3/ingress.yaml", destination: "/home/vagrant/app3/ingress.yaml"
-  config.vm.provision "file", source: "app3/index.html", destination: "/home/vagrant/app3/index.html"
+  config.vm.provision "file", source: "confs/app3/deployment.yaml", destination: "/home/vagrant/app3/deployment.yaml"
+  config.vm.provision "file", source: "confs/app3/service.yaml", destination: "/home/vagrant/app3/service.yaml"
+  config.vm.provision "file", source: "confs/app3/ingress.yaml", destination: "/home/vagrant/app3/ingress.yaml"
+  config.vm.provision "file", source: "confs/app3/index.html", destination: "/home/vagrant/app3/index.html"
 
   #
   # View the documentation for the provider you are using for more

@@ -1,0 +1,69 @@
+
+server_ip="192.168.56.110"
+agent_ip="192.168.56.111"
+
+Vagrant.configure("2") do |config|
+
+    config.vagrant.plugins = "vagrant-vmware-desktop"
+    config.vm.box = "koalephant/debian12"
+    config.vm.box_url = "https://app.vagrantup.com/koalephant/boxes/debian12/versions/1.1.0/providers/vmware_desktop/arm64/vagrant.box"
+
+    config.vm.define "ioromeroS" do |server|
+        server.vm.hostname = "ioromeroS"
+        server.vm.network "private_network", ip: server_ip
+        config.vm.synced_folder "./confs", "/vagrant_shared"
+        server.vm.provider "vmware_desktop" do |vmware|
+            vmware.memory = "512"
+            vmware.cpus = 1
+        end
+        server.ssh.insert_key = false
+        server.vm.provision "master_node", before: :all, type: "shell", inline: <<-SHELL
+            sudo -i
+
+            export INSTALL_K3S_EXEC="--node-ip #{server_ip} --bind-address #{server_ip} --advertise-address #{server_ip}"
+
+            curl -sfL https://get.k3s.io | sh -s -
+
+            echo "--------------------------------------------------"
+            echo "Sleeping for 5 seconds to wait for k3s to start  ⏳"
+            echo "--------------------------------------------------"
+            sleep 5
+            
+            cp /var/lib/rancher/k3s/server/token /vagrant_shared
+
+            echo "Files copied to /vagrant_shared                 ✅"
+            echo "--------------------------------------------------"
+        SHELL
+
+    end
+    
+    config.vm.define "ioromeroSW" do |serverworker|
+        serverworker.vm.hostname = "ioromeroSW"
+        serverworker.vm.network "private_network", ip: agent_ip
+        config.vm.synced_folder "./confs", "/vagrant_shared"
+        serverworker.vm.provider "vmware_desktop" do |vmware|
+            vmware.memory = "1024"
+            vmware.cpus = 1
+        end
+        serverworker.ssh.insert_key = false
+        serverworker.vm.provision "shell", inline: <<-SHELL
+            sudo -i
+            token=$(cat /vagrant_shared/token)
+            echo "--------------------------------------------------"
+            echo "Ip address of the server node: #{server_ip}"
+            echo "Token🔑: $token"
+            echo "--------------------------------------------------"
+
+            export K3S_URL=https://#{server_ip}:6443 
+            export K3S_TOKEN=$token
+            export INSTALL_K3S_EXEC="--node-ip #{agent_ip}"
+
+            curl -sfL https://get.k3s.io | sh - 
+
+            echo "--------------------------------------------------"
+            echo "Finished installing k3s on worker node          ✅"
+            echo "--------------------------------------------------"
+        SHELL
+    end
+
+end
